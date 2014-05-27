@@ -1,0 +1,216 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{color}
+\usepackage{listings}
+\usepackage[linktocpage,colorlinks=true]{hyperref}
+\usepackage{graphicx}
+\usepackage{multicol}
+
+\begin{document}
+
+\title{PerfOCaml: a Benchmarking Environment for OCaml\\Specification 2014/05/27}
+
+\maketitle
+
+\section{Use Cases}
+
+Some examples of what users should be able to do with PerfOCaml.
+
+\subsection{Compiler Patch Writer}
+
+\subsubsection{Local Testing}
+
+After building a modified compiler (with the right {\tt --prefix}
+option), install it, build and run different benchmarks, compare it
+with previous runs and previously generated reference results.
+
+\subsubsection{Publishing}
+
+Publish a branch on {\tt github}, register it on the site (maybe
+through a pull request). A set of benchmarks are run and comparison
+results are displayed on the public site.
+
+\subsection{Compiler Core Team}
+
+Regular snapshots of OCaml trunk and branches run against a series of
+benchmarks.
+
+\subsection{Library Developer}
+
+Provides benchmarks decriptions for its own library to be used when
+testing the compiler and for comparing library versions.
+
+\subsection{External Analysis}
+
+\begin{itemize}
+\item
+  Publicly available simple informations about compiler overall
+  performances evolution.
+
+\item
+  Go to bench web site, download some performance analysis,
+  comment/summit bug report according to the data to OCaml or to a
+  library.
+
+\end{itemize}
+
+
+\subsection{User in a difficult to reproduce scenario}
+
+If a user have access to a computer that have difficult to reproduce
+specificites (exotic architecture, system, ...), he sould be able to
+submit itself some benchmark results associated with system
+informations.
+
+\section{Proposition}
+
+Basic aim: minimize\footnote{Fabrice: we should not focus on
+  minimizing changes to OPAM, but on making the project as ambitious
+  as it needs, and fix OPAM when needed} changes to OPAM, and required
+management.
+
+There are two distinct kinds of benchmarks, \emph{micro-benchmarks} (a specific
+function) and \emph{macro-benchmarks} (a program).
+
+\begin{itemize}
+\item Benchmarks are specific OPAM packages, marked with a tag.
+\item Don't change OPAM
+\end{itemize}
+
+\subsection{Description of a benchmark}
+
+A benchmark is a specific OPAM package, it is not included in the
+library or program package. Running is done by installing the
+benchmark package. The install instruction copy the resulting data to
+a directory fixed by convention. (probably
+\texttt{\%\{prefix\}\%/bench/package\_name})
+
+A package generating benchmark results should be annotated with the
+\texttt{benchmark} tag.
+
+\begin{itemize}
+\item No or minimal change to opam are required.
+\item Allow to add additionnal dependencies to the benchmark that are
+  not required by the original package.
+\end{itemize}
+
+Potential problems:
+\begin{itemize}
+\item Benchmarking functions not available in a module interface is
+  not directly possible. It can be circumvented by having a benchmark
+  package containing the library sources (more package management
+  work), or by exposing a benchmarkable value in the interfaces (can
+  be done only by the library develloper).
+\end{itemize}
+
+\subsection{Benchmark result format}
+
+Not decided, probably a simple json or csv like
+format\footnote{Fabrice: it must be decided now. Any existing standard
+  in other languages ?}
+
+\section{Organisation in Sub-Projects}
+
+Comment\footnote{Fabrice: we should divide the global project into
+  several sub-projects, such as (1) local bench-marking a package, (2)
+  local bench-marking the compiler, (3) community website and (4)
+  OCaml performance weather server}
+
+\subsubsection{System informations}
+
+Recover as much relevant system informations as possible:
+\begin{itemize}
+\item Hardware informations: CPU, memory, ...
+\item System informations: versions of OS, libraries, virtualisation, ...
+\end{itemize}
+
+\subsubsection{Macro-benchmark Runner}
+
+Input:
+\begin{itemize}
+\item a binary path
+\item expected result
+\item variables, their encoding and potential values
+\end{itemize}
+
+Output:
+\begin{itemize}
+\item A benchmark file.
+\item Additionnal informations to analyse the results provided by
+  tools like \texttt{perf record} on linux or \texttt{callgrind}
+\end{itemize}
+
+Note: Reporting running time can be done simply in a cross platform
+way.
+
+Reporting more precise result like cycles is easy on linux but
+other systems would require some search. GC statistics requires
+changes to the original program. A possibility would be to addopt as
+convention that the environment variable
+\texttt{OCAML\_GC\_STATISTICS} contains a file where statistics should
+be written (using Gc.print\_stat).
+
+Defining a macrobenchmark package of a program built by an existing
+opam package should not requires to provides additionnal sources (a
+url file in the opam package).
+
+\subsubsection{Microbenchmark runner}
+
+Runs a set of functions, test the results, records the
+timings/cycles/gc informations and write raw results to the directory
+fixed by convention.
+
+Probably the runner part of core\_bench. This should be extracted from
+core\_bench (3 files) to minimize dependencies, especialy camlp4.
+
+This should be provided as a template package, already containing
+build system and base files. The user should only provide a .ml file
+containing a list of functions to test and a file containing the list
+of build dependencies (the ocamlfind -package part of the compilations
+command).
+
+This should allow to provide a microbenchmark as a simple opam package
+containing those 2 files in the \texttt{files} subdirectory.
+
+\subsubsection{Simple microbenchmark set}
+
+A set of microbenchmarks able to run everywhere without any difference
+should be provided to reliably test the compiler. It should not depend
+on any kind of code generation, or feaure specific to a version.
+
+\subsubsection{Management}
+
+\begin{itemize}
+\item List packages containing benchmarks
+\item Prepare an opam switch to install a manualy built compiler
+\item One command compile/run/recover/clean for a given opam compiler
+  package and set of benchmarks.
+\end{itemize}
+
+\subsubsection{Agregation}
+
+This tool should produce the set of graphs given a set of raw
+results. It will probably use core\_bench for the statistics part. It
+should produce the final html pages to display on the public site.
+
+\subsubsection{Results management}
+
+Use github: no tool needed.
+
+Benchmark results should be managed in a centralised git repositories,
+probably using github to minimize maintenance. Users publishing
+results on their exotic systems should send patches/pull requests.
+
+Common architectures results should always be provided by the same
+computers to allow easier comparisons, all results should be
+automaticaly produced and commited to the repository.
+
+\section{Milestones}
+
+Comment\footnote{Fabrice: we should define some initial milestones for
+  every sub-project}
+
+\end{document}
