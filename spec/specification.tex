@@ -112,11 +112,107 @@ Potential problems:
   be done only by the library develloper).
 \end{itemize}
 
+\subsubsection{variant}
+
+Another way to specify a benchmark could be to change opam packages to
+allow multiple packages to share the same description. This could be
+done through the addition of {\tt targets} to the opam file.
+
+For instance, given the following original package:
+
+\begin{verbatim}
+build: [
+  ["./configure" "--prefix" prefix]
+  [make]
+  [make "install"]
+]
+remove: [["ocamlfind" "remove" "mylib"]]
+depends: ["ocamlfind" "library1" "library2"]
+\end{verbatim}
+
+Adding the target doc and benchmark:
+
+\begin{verbatim}
+targets: ["documentation", "benchmark"]
+build: [
+  ["./configure" "--prefix" prefix]
+  [make]
+  [make "install"]
+]
+depends: ["ocamlfind" "library1" "library2"]
+remove: [["ocamlfind" "remove" "mylib"]]
+
+build-documentation: [
+  ["./configure" "--prefix" prefix]
+  [make doc]
+  [make "install-doc"]
+]
+depends-documentation: ["ocamlfind" "library1" "library2" "ocamldoc"]
+remove-documentation: [[make "uninstall-doc"]]
+
+build-benchmark: [
+  ["./configure" "--prefix" prefix]
+  [make]
+  [make bench]
+  ["cp" "-r" "bench_result" "%{share}%/benchmark/%{package-name}%/%{version}%"]
+]
+depends-benchmark: ["ocamlfind" "library1" "library2" {>= 1.3} "core_bench"]
+remove-benchmark: ["rm" "-rf" "%{share}%/benchmark/%{package-name}%/%{version}%"]
+\end{verbatim}
+
+This single opam file would describe, the package ``mylib'' but also
+``mylib-documentation'' and ``mylib-benchmark''.
+
+To distinguish with a specified ``mylib-benchmark'' package and allow
+to chose which one to install (with opam pin), the version of this
+kind of package whould be suffixed with ``+target'', and discret
+packages with this suffix would be forbidden. To ensure that the
+``-target'' packages are not installed with a different version of the
+library or program, implicit conflicts are added (the same conflicts
+that prevents two versions of a package to be installed at the same
+time).
+
+Note: it could be also be interesting to separate the ``./configure'',
+``make'' and ``make install'' part of the build command in three
+subcommands.
+
+Advantages
+\begin{itemize}
+\item Smaller opam repository maintenance burden (less files to edit).
+\item Could serve to also handle tests: The problem with testing is
+  that it is often easier to run them in the directory where the
+  library or program was built, because some tested functions could be
+  hidden by interfaces or some usefull data are kept in the source
+  tree. With this proposition, it is simple to define such testing
+  packages without duplicating package descriptions.
+
+  Compared to the current ``build-test'' opam feature it have a saner
+  dependency semantics, it does not force to rebuild all the package
+  depending on the tested package, and allows to have a completely
+  different configuration command than the build (enabling inline
+  tests, high verbosity, ...).
+\end{itemize}
+
+There is no loss of flexibility: if a completely different tarball is
+used for benchmarking, it is still possible to hand-define a
+benchmarking package like in the previous proposition.
+
+Potential problems:
+\begin{itemize}
+\item Increased compilation time when systematically building the
+  documentation. There may be some reasonnable solutions to build the
+  documentation where the library has been built in some common cases.
+\item more changes to opam
+\end{itemize}
+
 \subsection{Benchmark result format}
 
 Not decided, probably a simple json or csv like
 format\footnote{Fabrice: it must be decided now. Any existing standard
   in other languages ?}
+
+This should be the format both for compiler micro-benchmarks and for
+global benchmarks.
 
 \begin{verbatim}
 { name: "benchmark name",
