@@ -11,36 +11,34 @@
 
 \begin{document}
 
-\title{PerfOCaml: a Benchmarking Environment for OCaml\\Specification 2014/05/27}
+\title{PerfOCaml: a Benchmarking Environment for OCaml\\Specification 2014/06/02}
 
 \maketitle
-
+\tableofcontents
 \section{Use Cases}
 
-Some examples of what users should be able to do with PerfOCaml.
+Here are some examples of how users should be able to use PerfOCaml.
 
-Those are in this order, the expected milestones:
-
-\subsection{Micro-benchmarks for local testing}
+\subsection{Micro-benchmarking in the Compiler Directory}
 
 Allows to quickly evaluate the difference between previous versions or
 build of the compiler and the just build (not installed) one.
 
 In the directory where OCaml was built:
 \begin{itemize}
-\item {\tt ocp-perf-compiler init}: prepare the environment
-\item {\tt ocp-perf-compiler build}: prepare the benchmarking binaries
-\item {\tt ocp-perf-compiler clean}: reinitialize after a rebuild of the compiler
-\item {\tt ocp-perf-compiler run}: generate the benchmark result files
-\item {\tt ocp-perf-compiler save path}: save results to the path
-\item {\tt ocp-perf-compiler compare path}: compare the results with the runs saved in the path
+\item {\tt operf-compiler init}: prepare the environment
+\item {\tt operf-compiler build}: prepare the benchmarking binaries
+\item {\tt operf-compiler clean}: reinitialize after a rebuild of the compiler
+\item {\tt operf-compiler run}: generate the benchmark result files
+\item {\tt operf-compiler save path}: save results to the path
+\item {\tt operf-compiler compare path}: compare the results with the runs saved in the path
 \end{itemize}
 
 Constraints: should not depend on anything external to the just-built
 compiler, should run on windows and should be able to compare
 completely unrelated versions of the compiler.
 
-\subsection{Global benchmarks for local testing}
+\subsection{Macro-benchmarking in the Compiler Directory}
 
 Provides a more complete idea of the performance of a functionnal
 ocaml source tree.
@@ -49,13 +47,18 @@ After ensuring that the compiler seems to correctly work and install,
 run in the source directory:
 
 \begin{itemize}
-\item {\tt ocp-perf-ocaml init --(additionnal configure options)}: prepare the environment (create an opam root, switch, ...)
-\item {\tt ocp-perf-ocaml build [list of benchmark suites] }: build the compiler, the libraries and programs needed to run the selected benchmarks
-\item {\tt ocp-perf-ocaml run}: run the selected benchmarks and generated the result files
-\item {\tt ocp-perf-ocaml save path}: save results to the path
-\item {\tt ocp-perf-ocaml compare path}: compare the results with the runs saved in the path
-\item {\tt ocp-perf-ocaml clean}: reset to the state after init (can change the compiler source code and launch build with the updated sources).
+\item {\tt operf-ocaml init --(additionnal configure options)}: prepare the environment (create an opam root, switch, ...)
+\item {\tt operf-ocaml build [list of benchmark suites] }: build the compiler, the libraries and programs needed to run the selected benchmarks
+\item {\tt operf-ocaml run}: run the selected benchmarks and generate the result files
+\item {\tt operf-ocaml save path}: save results to the path
+\item {\tt operf-ocaml compare path}: compare the results with the runs saved in the path
+\item {\tt operf-ocaml clean}: reset to the state after init (can change the compiler source code and launch build with the updated sources).
 \end{itemize}
+
+\subsection{Macro-benchmarking an OPAM Switcha}
+
+Here, the user wants to benchmark a compiler or a package that is
+installed in some existing OPAM switch.
 
 \subsection{Weather service}
 
@@ -73,7 +76,55 @@ significative regressions and analysable raw data (like perf records).
 Users using exotic architectures or systems should be able to submit
 result assotiated with precise informations about the run environment.
 
-\section{Proposition}
+\section{Sub-Projects}
+
+\subsection{Micro-benchmarking in the Compiler Directory}
+
+\subsubsection{The {\tt operf-compiler} tool}
+
+\subsubsection{Format of the Micro Benchmarks}
+
+\subsubsection{Format of the {\tt \$HOME/.operf/micro/} directory}
+
+\subsubsection{Format of the Result Files}
+
+
+
+\subsection{Macro-benchmarking in the Compiler Directory}
+
+\subsubsection{The {\tt operf-ocaml} tool}
+
+\subsubsection{Format of the Macro Benchmarks}
+
+\subsubsection{Format of the {\tt \$HOME/.operf/macro/} directory}
+
+\subsubsection{Format of the Result Files}
+
+\subsection{Macro-benchmarking an OPAM Switch}
+
+\subsubsection{The {\tt operf-opam} tool}
+
+This tool has the same behavior as {\tt operf-ocaml}, except that,
+instead of being used in a compiler directory, it will install and run
+the macro benchmarks on the current OPAM switch (or one provided on
+the command line).
+
+\begin{itemize}
+\item {\tt operf-opam [--switch OPAM-SWITCH] install benchmark [...]}\\
+  Install the specified {\tt benchmarks} in the current switch (or 
+  {\tt OPAM-SWITCH} if provided).
+\item {\tt operf-opam [--switch OPAM-SWITCH] run [benchmark ...]}\\
+  Run the installed {\tt benchmarks} (or all the installed one, if none
+  is specified) and save the corresponding results.
+\end{itemize}
+
+\subsection{Weather service}
+
+\section{Miscellaneous Ideas}
+
+Provides a more complete idea of the performance of a functionnal
+ocaml source tree.
+
 
 Basic aim:
 \begin{itemize}
@@ -118,14 +169,7 @@ Not decided, probably a simple json or csv like
 format\footnote{Fabrice: it must be decided now. Any existing standard
   in other languages ?}
 
-\section{Organisation in Sub-Projects}
-
-Comment\footnote{Fabrice: we should divide the global project into
-  several sub-projects, such as (1) local bench-marking a package, (2)
-  local bench-marking the compiler, (3) community website and (4)
-  OCaml performance weather server}
-
-\subsubsection{System informations}
+\subsection{System informations}
 
 Recover as much relevant system informations as possible:
 \begin{itemize}
@@ -133,7 +177,7 @@ Recover as much relevant system informations as possible:
 \item System informations: versions of OS, libraries, virtualisation, ...
 \end{itemize}
 
-\subsubsection{Macro-benchmark Runner}
+\subsection{Macro-benchmark Runner}
 
 Input:
 \begin{itemize}
@@ -163,7 +207,7 @@ Defining a macrobenchmark package of a program built by an existing
 opam package should not requires to provides additionnal sources (a
 url file in the opam package).
 
-\subsubsection{Microbenchmark runner}
+\subsection{Microbenchmark runner}
 
 Runs a set of functions, test the results, records the
 timings/cycles/gc informations and write raw results to the directory
@@ -181,13 +225,13 @@ command).
 This should allow to provide a microbenchmark as a simple opam package
 containing those 2 files in the \texttt{files} subdirectory.
 
-\subsubsection{Simple microbenchmark set}
+\subsection{Simple microbenchmark set}
 
 A set of microbenchmarks able to run everywhere without any difference
 should be provided to reliably test the compiler. It should not depend
 on any kind of code generation, or feaure specific to a version.
 
-\subsubsection{Management}
+\subsection{Management}
 
 \begin{itemize}
 \item List packages containing benchmarks
@@ -196,13 +240,13 @@ on any kind of code generation, or feaure specific to a version.
   package and set of benchmarks.
 \end{itemize}
 
-\subsubsection{Agregation}
+\subsection{Agregation}
 
 This tool should produce the set of graphs given a set of raw
 results. It will probably use core\_bench for the statistics part. It
 should produce the final html pages to display on the public site.
 
-\subsubsection{Results management}
+\subsection{Results management}
 
 Use github: no tool needed.
 
@@ -213,10 +257,5 @@ results on their exotic systems should send patches/pull requests.
 Common architectures results should always be provided by the same
 computers to allow easier comparisons, all results should be
 automaticaly produced and commited to the repository.
-
-\section{Milestones}
-
-Comment\footnote{Fabrice: we should define some initial milestones for
-  every sub-project}
 
 \end{document}
