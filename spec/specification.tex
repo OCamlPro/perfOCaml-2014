@@ -26,12 +26,12 @@ build of the compiler and the just build (not installed) one.
 
 In the directory where OCaml was built:
 \begin{itemize}
-\item {\tt operf-compiler init}: prepare the environment
-\item {\tt operf-compiler build}: prepare the benchmarking binaries
-\item {\tt operf-compiler clean}: reinitialize after a rebuild of the compiler
-\item {\tt operf-compiler run}: generate the benchmark result files
-\item {\tt operf-compiler save path}: save results to the path
-\item {\tt operf-compiler compare path}: compare the results with the runs saved in the path
+\item {\tt operf-micro init}: prepare the environment
+\item {\tt operf-micro build}: prepare the benchmarking binaries
+\item {\tt operf-micro clean}: reinitialize after a rebuild of the compiler
+\item {\tt operf-micro run}: generate the benchmark result files
+\item {\tt operf-micro save path}: save results to the path
+\item {\tt operf-micro compare path}: compare the results with the runs saved in the path
 \end{itemize}
 
 Constraints: should not depend on anything external to the just-built
@@ -80,15 +80,72 @@ result assotiated with precise informations about the run environment.
 
 \subsection{Micro-benchmarking in the Compiler Directory}
 
-\subsubsection{The {\tt operf-compiler} tool}
+\subsubsection{The {\tt operf-micro} tool}
+
+In the directory {\tt\em \$OCAMLSRC} where OCaml was built:
+\begin{itemize}
+\item {\tt operf-micro init {\em name}}\\ Prepare the environment
+  for micro-benchmarking the compiler in the same directory.
+  Do the following operations:
+  \begin{itemize}
+  \item Create a sub-directory {\tt operf}, with a config file {\tt config}
+  indicating that the name of the current compiler is {\tt\em name}.
+  {\tt operf-micro} will complain if the directory
+  {\tt \$HOME/.operf/micro/{\em name}/} already exists (as it will try to
+  save the micro-benchmarks results in that location).
+  \item Download a compressed archive of the micro-benchmark from a
+    default URL. A {\tt [--benchmarks {\em url} ]} switch could be
+    used to override the default URL, in particular to specify a local
+    archive.
+  \item Extract the archive in the {\tt operf} sub-directory
+  \end{itemize}
+\item {\tt operf-micro build [--byte | --opt]}\\
+  Try to build the benchmarks, using the local compiler. The benchmarks will
+  assume that the bytecode compiler is:\\
+  {\tt \$OCAMLSRC/byterun/ocamlrun \$OCAMLSRC/ocamlc -I \$OCAMLSRC/stdlib}\\
+  and the native code compiler is:\\
+  {\tt \$OCAMLSRC/byterun/ocamlrun \$OCAMLSRC/ocamlopt -I \$OCAMLSRC/stdlib}\\
+  It might also assume that the {\tt bigarray} library is available.
+  This step is useful if some changes have to be done to the benchmarks in
+  order for them to correctly compile (note that changing the benchmarks
+  can lead to false comparisons).
+\item {\tt operf-micro clean}\\
+  Reinitialize after a rebuild of the compiler
+\item {\tt operf-micro run [--byte | --opt]}\\
+  Run the micro-benchmarks. If {\tt \$OCAMLSRC/byterun/ocamlrun},
+  {\tt \$OCAMLSRC/ocamlc} or {\tt \$OCAMLSRC/ocamlopt} have changed since the
+  last compilation, it will first clean the benchmarks. If needed, it will
+  compile the benchmarks.
+
+  Results are stored in {\tt \$HOME/.operf/micro/{\em name}/{\em
+      date}/} where {\tt\em date} has the format {\tt\em
+    YYYY-MM-DD-hh-mm-ss}.
+\item {\tt operf-micro compare {\tt ({\em name} | {\em date} | {\em
+      name:date}) }}\\ Compare the latest results with a previous run.
+  If {\tt\em name} is provided, it is for another compiler. If {\tt\em
+    date} is provided, it is the last run just before or equal to that
+  date.
+\item {\tt operf-micro save-diff {\em diff-name}}\\
+  If modifications where done to the micro-benchmarks, save them in
+  {\tt \$HOME/.operf/micro-diffs/{\em diff-name}.patch} for later use.
+  An example of meaningful modification would be to replace an old
+  construct with a new one only available after a given compiler version.
+\item  {\tt operf-micro load-diff {\em diff-name}}\\
+  Try to find an existing patch and apply it to the current benchmarks.
+\item {\tt operf-micro version {\em ocaml-version ...}}\\ Download OCaml
+  sources for version {\tt\em ocaml-version}, build them, create a
+  micro-benchmark with name {\tt\em ocaml-version}, and run the
+  micro-benchmarks. This can be used to populate the micro-benchmarks
+  for comparisons.
+\end{itemize}
 
 \subsubsection{Format of the Micro Benchmarks}
 
-\subsubsection{Format of the {\tt \$HOME/.operf/micro/} directory}
+\subsubsection{Format of the {\tt \$HOME/.operf/} directory}
 
 \subsubsection{Format of the Result Files}
 
-
+\subsubsection{Format of the Comparison Results}
 
 \subsection{Macro-benchmarking in the Compiler Directory}
 
@@ -110,11 +167,11 @@ the macro benchmarks on the current OPAM switch (or one provided on
 the command line).
 
 \begin{itemize}
-\item {\tt operf-opam [--switch OPAM-SWITCH] install benchmark [...]}\\
-  Install the specified {\tt benchmarks} in the current switch (or 
-  {\tt OPAM-SWITCH} if provided).
-\item {\tt operf-opam [--switch OPAM-SWITCH] run [benchmark ...]}\\
-  Run the installed {\tt benchmarks} (or all the installed one, if none
+\item {\tt operf-opam [--switch {\em OPAM-SWITCH} ] install {\em
+    benchmark} [...]}\\ Install the specified {\tt\em benchmarks} in
+  the current switch (or {\tt\em OPAM-SWITCH} if provided).
+\item {\tt operf-opam [--switch {\em OPAM-SWITCH} ] run [{\em benchmark} ...]}\\
+  Run the installed {\tt\em benchmarks} (or all the installed one, if none
   is specified) and save the corresponding results.
 \end{itemize}
 
