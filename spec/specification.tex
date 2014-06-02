@@ -19,68 +19,74 @@
 
 Some examples of what users should be able to do with PerfOCaml.
 
-\subsection{Compiler Patch Writer}
+Those are in this order, the expected milestones:
 
-\subsubsection{Local Testing}
+\subsection{Micro-benchmarks for local testing}
 
-After building a modified compiler (with the right {\tt --prefix}
-option), install it, build and run different benchmarks, compare it
-with previous runs and previously generated reference results.
+Allows to quickly evaluate the difference between previous versions or
+build of the compiler and the just build (not installed) one.
 
-\subsubsection{Publishing}
-
-Publish a branch on {\tt github}, register it on the site (maybe
-through a pull request). A set of benchmarks are run and comparison
-results are displayed on the public site.
-
-\subsection{Compiler Core Team}
-
-Regular snapshots of OCaml trunk and branches run against a series of
-benchmarks.
-
-\subsection{Library Developer}
-
-Provides benchmarks decriptions for its own library to be used when
-testing the compiler and for comparing library versions.
-
-\subsection{External Analysis}
-
+In the directory where OCaml was built:
 \begin{itemize}
-\item
-  Publicly available simple informations about compiler overall
-  performances evolution.
-
-\item
-  Go to bench web site, download some performance analysis,
-  comment/summit bug report according to the data to OCaml or to a
-  library.
-
+\item {\tt ocp-perf-compiler init}: prepare the environment
+\item {\tt ocp-perf-compiler build}: prepare the benchmarking binaries
+\item {\tt ocp-perf-compiler clean}: reinitialize after a rebuild of the compiler
+\item {\tt ocp-perf-compiler run}: generate the benchmark result files
+\item {\tt ocp-perf-compiler save path}: save results to the path
+\item {\tt ocp-perf-compiler compare path}: compare the results with the runs saved in the path
 \end{itemize}
 
+Constraints: should not depend on anything external to the just-built
+compiler, should run on windows and should be able to compare
+completely unrelated versions of the compiler.
 
-\subsection{User in a difficult to reproduce scenario}
+\subsection{Global benchmarks for local testing}
 
-If a user have access to a computer that have difficult to reproduce
-specificites (exotic architecture, system, ...), he sould be able to
-submit itself some benchmark results associated with system
-informations.
+Provides a more complete idea of the performance of a functionnal
+ocaml source tree.
+
+After ensuring that the compiler seems to correctly work and install,
+run in the source directory:
+
+\begin{itemize}
+\item {\tt ocp-perf-ocaml init --(additionnal configure options)}: prepare the environment (create an opam root, switch, ...)
+\item {\tt ocp-perf-ocaml build [list of benchmark suites] }: build the compiler, the libraries and programs needed to run the selected benchmarks
+\item {\tt ocp-perf-ocaml run}: run the selected benchmarks and generated the result files
+\item {\tt ocp-perf-ocaml save path}: save results to the path
+\item {\tt ocp-perf-ocaml compare path}: compare the results with the runs saved in the path
+\item {\tt ocp-perf-ocaml clean}: reset to the state after init (can change the compiler source code and launch build with the updated sources).
+\end{itemize}
+
+\subsection{Weather service}
+
+The Weather service should be a regularly (automatically) updated web
+page comparing different versions of the compilers.
+
+Every day or commit in a compiler branch the compiler should be
+rebuilt and run on various sets of benchmarks based on a set of fixed
+versions of opam packages (the same for every version of the compiler)
+
+The site should provide graphs of evolutions of differents agregated
+performance indices, precise results for each benchmarks, a list of
+significative regressions and analysable raw data (like perf records).
+
+Users using exotic architectures or systems should be able to submit
+result assotiated with precise informations about the run environment.
 
 \section{Proposition}
 
-Basic aim: minimize\footnote{Fabrice: we should not focus on
-  minimizing changes to OPAM, but on making the project as ambitious
-  as it needs, and fix OPAM when needed} changes to OPAM, and required
-management.
+Basic aim:
+\begin{itemize}
+\item Micro-benchmarking should be as fast and simple as possible.
+\item Global benchmarking and weather service should share their sets
+  of benchmarks. This set should be easy to extend.
+\item Weather services should require as few maintenance as possible.
+\end{itemize}
 
 There are two distinct kinds of benchmarks, \emph{micro-benchmarks} (a specific
 function) and \emph{macro-benchmarks} (a program).
 
-\begin{itemize}
-\item Benchmarks are specific OPAM packages, marked with a tag.
-\item Don't change OPAM
-\end{itemize}
-
-\subsection{Description of a benchmark}
+\subsection{Description of a global benchmarks}
 
 A benchmark is a specific OPAM package, it is not included in the
 library or program package. Running is done by installing the
