@@ -118,6 +118,27 @@ Not decided, probably a simple json or csv like
 format\footnote{Fabrice: it must be decided now. Any existing standard
   in other languages ?}
 
+\begin{verbatim}
+{ name: "benchmark name",
+  ocaml-version: "4.02.1+hash",
+  date: "Mon Jun  2 15:27:43 CEST 2014",
+  computer-description:
+    { architecure: "amd64",
+      model: "...",
+      system: "Linux 3.13-1-amd64",
+      ... },
+  runs:
+    [ { name: "some function",
+        description: "...",
+        list:
+          [ { count: 1000, time: 0.00123, cycles: 1234567,
+              minor-words: 123, major-words: 1,
+              compactions: 0, ... },
+            { time: 132, ... },
+            ... ] },
+      ... ] }
+\end{verbatim}
+
 \section{Organisation in Sub-Projects}
 
 Comment\footnote{Fabrice: we should divide the global project into
