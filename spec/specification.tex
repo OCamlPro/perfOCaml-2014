@@ -91,12 +91,14 @@ In the directory {\tt\em \$OCAMLSRC} where OCaml was built:
   \item Create a sub-directory {\tt operf}, with a config file {\tt config}
   indicating that the name of the current compiler is {\tt\em name}.
   {\tt operf-micro} will complain if the directory
-  {\tt \$HOME/.operf/micro/{\em name}/} already exists (as it will try to
+  {\tt \$HOME/.operf/micro/{\em name}/} \footnote{the path should probably
+    follow XDG recomandations} already exists (as it will try to
   save the micro-benchmarks results in that location).
   \item Download a compressed archive of the micro-benchmark from a
     default URL. A {\tt [--benchmarks {\em url} ]} switch could be
     used to override the default URL, in particular to specify a local
-    archive.
+    archive.\footnote{It should probably use the one provided at
+      installation}
   \item Extract the archive in the {\tt operf} sub-directory
   \end{itemize}
 \item {\tt operf-micro build [--byte | --opt]}\\
@@ -219,7 +221,7 @@ Potential problems:
   be done only by the library develloper).
 \end{itemize}
 
-\subsubsection{variant}
+\subsubsection{Usefull opam extension}
 
 Another way to specify a benchmark could be to change opam packages to
 allow multiple packages to share the same description. This could be
@@ -316,7 +318,8 @@ Potential problems:
 
 Not decided, probably a simple json or csv like
 format\footnote{Fabrice: it must be decided now. Any existing standard
-  in other languages ?}
+  in other languages ?\\
+  Pierre: didn't find any for our use cases }
 
 \begin{verbatim}
 { name: "benchmark name",
@@ -427,5 +430,9 @@ results on their exotic systems should send patches/pull requests.
 Common architectures results should always be provided by the same
 computers to allow easier comparisons, all results should be
 automaticaly produced and commited to the repository.
+
+\section{Related work}
+
+\href{http://speed.pypy.org/}{pypy speed site}
 
 \end{document}
