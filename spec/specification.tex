@@ -143,11 +143,114 @@ In the directory {\tt\em \$OCAMLSRC} where OCaml was built:
 
 \subsubsection{Format of the Micro Benchmarks}
 
+A micro benchmark archive contains:
+
+\begin{itemize}
+\item {\tt description}: a textual desciprion of what the benchmark does and evaluates
+\item {\tt set}: a directory containing benchmark directories
+  \begin{itemize}
+  \item benchmark\_name
+    \begin{itemize}
+    \item {\tt main.ml}: containing a {\tt functions} variable
+      describing the list of available functions to run
+    \item optionnal additionnal .ml files
+    \item optionnal {\tt compile} file: describe how to compile the suite If none provided, a
+      reasonnable default is assumed
+    \end{itemize}
+  \end{itemize}
+\end{itemize}
+
+{\tt main.ml}
+\begin{verbatim}
+
+let f1 () = 1 + 2
+let check_f1 v = v = 3
+
+let f2 n = Array.create n 1
+let check_f2 n v = Array.length v = n
+
+open Micro_bench_types
+
+let functions =
+  [ "function 1",          Unit (f1, check_f1);
+    "some other function", Int (f2, check_f2) ]
+
+\end{verbatim}
+
+{\tt compile}
+\begin{verbatim}
+file1.mli file1.ml file2.ml main.ml
+\end{verbatim}
+The order field, describe the compile and link order. If no {\tt compile}
+file is provided one containing only ``main.ml'' is assumed.
+\footnote{should we allow C files ?}
+
+The files will be compiled with the command line:
+\begin{verbatim}
+ocamlopt micro_bench_type.mli file1.mli file1.ml file2.ml main.ml micro_bench_runner.ml
+\end{verbatim}
+
 \subsubsection{Format of the {\tt \$HOME/.operf/} directory}
+
+\begin{itemize}
+\item {\tt config} file describing general configuration
+\item {\tt sets} directory containing:
+  \begin{itemize}
+  \item {\tt additionnal} directory with additional benchmark
+    suites. The structure is like a benchmark archive
+  \item {\tt patch} directory containing .patch files applicable to
+    existing suite
+  \end{itemize}
+\item {\tt results}:
+  \begin{itemize}
+  \item {\tt last}: a file with the name of the last recorded results
+  \item ``compiler name'' directories
+    \begin{itemize}
+    \item ``revision'' or ``date/time'' directories
+      \begin{itemize}
+      \item {\tt system\_info}
+      \item ``suite name''.result
+      \end{itemize}
+    \end{itemize}
+  \end{itemize}
+\end{itemize}
+
+\begin{verbatim}
+{ name: "farm runner 1",
+  cpu: { architecture: "amd64",
+         count: 4,
+         ... },
+  memory: { size: 4096, ... },
+  os: { virtualized: true,
+        kind: "Linux",
+        ... } }
+\end{verbatim}
 
 \subsubsection{Format of the Result Files}
 
+\begin{verbatim}
+{ name: "benchmark name",
+  ocaml-version: "4.02.1+hash",
+  date: "Mon Jun  2 15:27:43 CEST 2014",
+  computer-description:
+    { architecure: "amd64",
+      model: "...",
+      system: "Linux 3.13-1-amd64",
+      ... },
+  runs:
+    [ { name: "some function",
+        description: "...",
+        list:
+          [ { count: 1000, time: 0.00123, cycles: 1234567,
+              minor-words: 123, major-words: 1,
+              compactions: 0, ... },
+            { time: 132, ... },
+            ... ] },
+      ... ] }
+\end{verbatim}
+
 \subsubsection{Format of the Comparison Results}
+A human readable result. Either textual statistical informations or a graph.
 
 \subsection{Macro-benchmarking in the Compiler Directory}
 
@@ -158,6 +261,9 @@ In the directory {\tt\em \$OCAMLSRC} where OCaml was built:
 \subsubsection{Format of the {\tt \$HOME/.operf/macro/} directory}
 
 \subsubsection{Format of the Result Files}
+
+The same format as micro benchmark results, but run fields may differ
+depending on what is available and macro benchmark inputs.
 
 \subsection{Macro-benchmarking an OPAM Switch}
 
@@ -312,43 +418,6 @@ Potential problems:
   documentation. There may be some reasonnable solutions to build the
   documentation where the library has been built in some common cases.
 \item more changes to opam
-\end{itemize}
-
-
-\subsection{Benchmark result format}
-
-Not decided, probably a simple json or csv like
-format\footnote{Fabrice: it must be decided now. Any existing standard
-  in other languages ?\\
-  Pierre: didn't find any for our use cases }
-
-\begin{verbatim}
-{ name: "benchmark name",
-  ocaml-version: "4.02.1+hash",
-  date: "Mon Jun  2 15:27:43 CEST 2014",
-  computer-description:
-    { architecure: "amd64",
-      model: "...",
-      system: "Linux 3.13-1-amd64",
-      ... },
-  runs:
-    [ { name: "some function",
-        description: "...",
-        list:
-          [ { count: 1000, time: 0.00123, cycles: 1234567,
-              minor-words: 123, major-words: 1,
-              compactions: 0, ... },
-            { time: 132, ... },
-            ... ] },
-      ... ] }
-\end{verbatim}
-
-\subsection{System informations}
-
-Recover as much relevant system informations as possible:
-\begin{itemize}
-\item Hardware informations: CPU, memory, ...
-\item System informations: versions of OS, libraries, virtualisation, ...
 \end{itemize}
 
 \subsection{Macro-benchmark Runner}
