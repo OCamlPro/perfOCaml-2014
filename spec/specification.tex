@@ -11,7 +11,7 @@
 
 \begin{document}
 
-\title{PerfOCaml: a Benchmarking Environment for OCaml\\Specification 2014/06/02}
+\title{PerfOCaml: a Benchmarking Environment for OCaml\\Specification\\Pierre's last edit on: 2014/06/04}
 
 \maketitle
 \tableofcontents
@@ -26,12 +26,14 @@ build of the compiler and the just build (not installed) one.
 
 In the directory where OCaml was built:
 \begin{itemize}
-\item {\tt operf-micro init}: prepare the environment
+\item {\tt operf-micro init name}: prepare the environment
 \item {\tt operf-micro build}: prepare the benchmarking binaries
 \item {\tt operf-micro clean}: reinitialize after a rebuild of the compiler
 \item {\tt operf-micro run}: generate the benchmark result files
+\item {\tt operf-micro build-run}: run both the build and run commands
 \item {\tt operf-micro save path}: save results to the path
 \item {\tt operf-micro compare path}: compare the results with the runs saved in the path
+\item {\tt operf-micro list}: print the list of benchmark groups
 \end{itemize}
 
 Constraints: should not depend on anything external to the just-built
@@ -91,17 +93,34 @@ In the directory {\tt\em \$OCAMLSRC} where OCaml was built:
   \item Create a sub-directory {\tt operf}, with a config file {\tt config}
   indicating that the name of the current compiler is {\tt\em name}.
   {\tt operf-micro} will complain if the directory
-  {\tt \$HOME/.operf/micro/{\em name}/} \footnote{the path should probably
+  {\tt \$HOME/.operf/micro/{\em name}/} \footnote{TODO the path should
     follow XDG recomandations} already exists (as it will try to
   save the micro-benchmarks results in that location).
-  \item Download a compressed archive of the micro-benchmark from a
-    default URL. A {\tt [--benchmarks {\em url} ]} switch could be
-    used to override the default URL, in particular to specify a local
-    archive.\footnote{It should probably use the one provided at
-      installation}
-  \item Extract the archive in the {\tt operf} sub-directory
+  \item
+    if {\tt \$PREFIX/share/operf/micro} exists, copy it to the
+    {\tt operf} sub-directory.\\
+    otherwise
+    \begin{itemize}
+    \item Download a compressed archive of the micro-benchmark from a
+      default URL. A {\tt [--benchmarks {\em url} ]} switch could be
+      used to override the default URL, in particular to specify a
+      local archive.\footnote{It should probably use the one provided
+        at installation}
+    \item Extract the archive in the {\tt operf} sub-directory
+    \end{itemize}
   \end{itemize}
-\item {\tt operf-micro build [--byte | --opt]}\\
+\item {\tt operf-micro build [--byte | --opt] [--args ``...'' | --opt-args ``...'' | --byte-args ``...''] [--name ``...'']}\\
+  Create or replace the files
+  \begin{itemize}
+  \item {\tt operf/timestamp} containing the current time, in the
+    {\tt\em YYYY-MM-DD\_hh-mm-ss} format identifying the build.
+  \item {\tt operf/name} containing the {\tt --name} argument, to
+    annotate the build
+  \item {\tt operf/args} {\tt operf/byte-args} {\tt operf/opt-args}
+    containing the {\tt --args} argument, to pass compilation options
+    to ocaml when building benchmarks. Typically for optimisations
+    (like --inline or --unsafe)
+  \end{itemize}
   Try to build the benchmarks, using the local compiler. The benchmarks will
   assume that the bytecode compiler is:\\
   {\tt \$OCAMLSRC/byterun/ocamlrun \$OCAMLSRC/ocamlc -I \$OCAMLSRC/stdlib}\\
@@ -113,15 +132,32 @@ In the directory {\tt\em \$OCAMLSRC} where OCaml was built:
   can lead to false comparisons).
 \item {\tt operf-micro clean}\\
   Reinitialize after a rebuild of the compiler
-\item {\tt operf-micro run [--byte | --opt]}\\
+\item {\tt operf-micro run [--fast | --slow | --all] [--name ``...''] [--arg n]}\\
   Run the micro-benchmarks. If {\tt \$OCAMLSRC/byterun/ocamlrun},
   {\tt \$OCAMLSRC/ocamlc} or {\tt \$OCAMLSRC/ocamlopt} have changed since the
   last compilation, it will first clean the benchmarks. If needed, it will
   compile the benchmarks.
 
-  Results are stored in {\tt \$HOME/.operf/micro/{\em name}/{\em
-      date}/} where {\tt\em date} has the format {\tt\em
-    YYYY-MM-DD-hh-mm-ss}.
+  Results are stored in {\tt \$HOME/.operf/results/{\em name}/{\em
+      date}/}\footnote{TODO: XDG} where {\tt\em date} has the
+  format {\tt\em YYYY-MM-DD\_hh-mm-ss} (the date is the one recorded
+  in {\tt operf/timestamp}.
+
+  If {\tt --all} is specified, all benchmarks are run, if {\tt --slow}
+  is specified, slower benchmarks are not run, if none or
+  {\tt --fast} is specified, only benchmarks marked as fast
+  running are run. \\
+  If {\tt --name ``group''} is specified, the functions from this
+  group are run. If {\tt --name ``group.function''} is specified, this
+  function from this group is run. This option can be added multiple
+  times to run multiple functions. If no --name option is present, all
+  functions are run. \\
+  If {\tt --arg n} is specified with n an integer or a range ``n-m'' of
+  integers, parametrised benchmarks are run with those arguments. Can
+  be specified multiple times
+
+\item {\tt operf-micro build-run [build and run options]}\\
+  Execute the build then the run command.
 \item {\tt operf-micro compare {\tt ({\em name} | {\em date} | {\em
       name:date}) }}\\ Compare the latest results with a previous run.
   If {\tt\em name} is provided, it is for another compiler. If {\tt\em
@@ -139,56 +175,123 @@ In the directory {\tt\em \$OCAMLSRC} where OCaml was built:
   micro-benchmark with name {\tt\em ocaml-version}, and run the
   micro-benchmarks. This can be used to populate the micro-benchmarks
   for comparisons.
+\item {\tt operf-micro list}: print the list of benchmark groups
 \end{itemize}
+
+The {\tt operf-micro} tool must be able to run on any platform and
+simple to build: it should avoid external dependencies, and should be
+shippable as a single binary. It should work without
+(tar/gunzip/curl/...) but specific commands using them could fail.
 
 \subsubsection{Format of the Micro Benchmarks}
 
-A micro benchmark archive contains:
+Micro benchmarks can be provided:
+\begin{itemize}
+\item by the operf archive and be installed when installing operf
+  binaries. In that case it is present at {\tt
+    \$PREFIX/share/operf/micro/}\footnote{operf configuration time
+    prefix}
+\item by the user: in the {\tt \$HOME/.operf/micro/}\footnote{XDG}
+  directory.
+\item in an archive file
+\end{itemize}
+
+In each case, the directory structure is:
 
 \begin{itemize}
-\item {\tt description}: a textual desciprion of what the benchmark does and evaluates
-\item {\tt set}: a directory containing benchmark directories
+\item {\tt description.txt}: a textual desciprion of what the benchmark does and evaluates
+\item Directories whose names are benchmarks names. A directory is
+  considered to describe a benchmark if it contains a {\tt
+    benchmark.ml} file.
   \begin{itemize}
-  \item benchmark\_name
-    \begin{itemize}
-    \item {\tt main.ml}: containing a {\tt functions} variable
-      describing the list of available functions to run
-    \item optionnal additionnal .ml files
-    \item optionnal {\tt compile} file: describe how to compile the suite If none provided, a
-      reasonnable default is assumed
-    \end{itemize}
+  \item {\tt benchmark.ml}: containing a {\tt functions} variable of
+    type ``Micro\_bench\_types.benchmark list''. It is the list of
+    available functions to run.
+  \item optionnal additionnal .ml files
+  \item optionnal {\tt benchmark.build} file: describe how to compile the
+    suite If none provided, a reasonnable default is assumed
   \end{itemize}
 \end{itemize}
 
-{\tt main.ml}
+{\tt benchmark.ml}
 \begin{verbatim}
 
 let f1 () = 1 + 2
 let check_f1 v = v = 3
 
 let f2 n = Array.create n 1
+let gen_f2 n = n
 let check_f2 n v = Array.length v = n
 
 open Micro_bench_types
 
 let functions =
-  [ "function 1",          Unit (f1, check_f1);
-    "some other function", Int (f2, check_f2) ]
+  [ "function 1",          Unit (f1, check_f1, Fast);
+    "some other function", Int (f2, gen_f2, check_f2,
+                               [ Range (0, 100000), Fast;
+                                 Range (100001, 100000000), Slow;
+                                 Range (100000001, 10000000000), Slower ]) ]
 
 \end{verbatim}
 
-{\tt compile}
+{\tt benchmark.build}
 \begin{verbatim}
-file1.mli file1.ml file2.ml main.ml
+{ files: ["file1.mli" "file1.ml" "file2.ml" "benchmark.ml"],
+  link: ["bigarray"],
+  opt: ["-rectypes"]
+  available_if: ... }
 \end{verbatim}
-The order field, describe the compile and link order. If no {\tt compile}
-file is provided one containing only ``main.ml'' is assumed.
-\footnote{should we allow C files ?}
+\footnote{available\_if still to define. Does it contraint ocaml version, or features ?}
+
+If available\_if if not verified or if libraries specified in link are
+not available, the benchmark won't be built or run.
+
+the default (if not specified) {\tt benchmark.build} is
+\begin{verbatim}
+{ files: ["benchmark.ml"] }
+\end{verbatim}
 
 The files will be compiled with the command line:
 \begin{verbatim}
-ocamlopt micro_bench_type.mli file1.mli file1.ml file2.ml main.ml micro_bench_runner.ml
+ocamlrun ocamlopt -I stdlib -I bigarray bigarray.cmxa -rectypes $ARGS $OPT_ARGS micro_bench_type.mli file1.mli file1.ml file2.ml main.ml micro_bench_runner.ml -o native
 \end{verbatim}
+or
+\begin{verbatim}
+ocamlrun ocamlopt -I stdlib -I bigarray bigarray.cma -rectypes $ARGS $BYTE_ARGS micro_bench_type.mli file1.mli file1.ml file2.ml main.ml micro_bench_runner.ml -o byte
+\end{verbatim}
+
+
+{\tt micro\_bench\_type.mli} is fixed and is:
+\begin{verbatim}
+type result =
+  | Ok
+  | Error of string
+
+type cost =
+  | Fast
+  | Slow
+  | Slower
+
+type range =
+  | Any
+  | Range of int * int
+  | List of int list
+
+type function_kind =
+  | Unit :  ( unit -> 'result )   (* benchmarked function *)
+          * ( 'result -> result ) (* test function *)
+          * cost                  (* estimated run time *)
+          -> function_kind
+  | Int : ( 'arg -> 'result )     (* benchmarked function *)
+          * ( int -> 'arg )       (* argument generation *)
+          * ( 'result -> result ) (* test function *)
+          * (range * cost) list   (* estimated run time for parameter range *)
+          -> function_kind
+
+type benchmark = string (* function name *)
+               * function_kind
+\end{verbatim}
+
 
 \subsubsection{Format of the {\tt \$HOME/.operf/} directory}
 
@@ -503,6 +606,7 @@ automaticaly produced and commited to the repository.
 
 \section{Related work}
 
-\href{http://speed.pypy.org/}{pypy speed site}
+\href{http://speed.pypy.org/}{pypy speed site}\\
+\href{https://github.com/janestreet/core_bench}{Core\_bench}
 
 \end{document}
