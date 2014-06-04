@@ -158,8 +158,8 @@ In the directory {\tt\em \$OCAMLSRC} where OCaml was built:
 
 \item {\tt operf-micro build-run [build and run options]}\\
   Execute the build then the run command.
-\item {\tt operf-micro compare {\tt ({\em name} | {\em date} | {\em
-      name:date}) }}\\ Compare the latest results with a previous run.
+\item {\tt operf-micro compare [({\em name} | {\em date} | {\em
+      name:date})]}\\ Compare the latest results with a previous run.
   If {\tt\em name} is provided, it is for another compiler. If {\tt\em
     date} is provided, it is the last run just before or equal to that
   date.
@@ -185,7 +185,7 @@ shippable as a single binary. It should work without
 
 \subsubsection{Format of the Micro Benchmarks}
 
-Micro benchmarks can be provided:
+Micro benchmarks can be provided:\label{micro-dir-format}
 \begin{itemize}
 \item by the operf archive and be installed when installing operf
   binaries. In that case it is present at {\tt
@@ -293,41 +293,49 @@ type benchmark = string (* function name *)
 \end{verbatim}
 
 
-\subsubsection{Format of the {\tt \$HOME/.operf/} directory}
-
+\subsubsection{Format of the {\tt \$HOME/.operf/} directories}
+\footnote{XDG}
 \begin{itemize}
-\item {\tt config} file describing general configuration
-\item {\tt sets} directory containing:
+\item {\tt config} file describing general configuration.
+  \footnote{None currently, but some needs will certainly emerge}
+  General format:
+\begin{verbatim}
+{ key : "value",
+  key2 : "value" }
+\end{verbatim}
+\item {\tt micro}
   \begin{itemize}
-  \item {\tt additionnal} directory with additional benchmark
-    suites. The structure is like a benchmark archive
-  \item {\tt patch} directory containing .patch files applicable to
-    existing suite
+  \item benchmarks structure described in the \ref{micro-dir-format} section
+  \item {\tt patch} directory containing .patch files applicable to existing suite
   \end{itemize}
-\item {\tt results}:
+\item {\tt results}: contains both micro and macro benchmark results.
   \begin{itemize}
-  \item {\tt last}: a file with the name of the last recorded results
-  \item ``compiler name'' directories
+  \item ``compiler name''/{\tt\em YYYY-MM-DD\_hh-mm-ss} directories
     \begin{itemize}
-    \item ``revision'' or ``date/time'' directories
-      \begin{itemize}
-      \item {\tt system\_info}
-      \item ``suite name''.result
-      \end{itemize}
+    \item {\tt system\_info}
+    \item ``suite name''.result
     \end{itemize}
   \end{itemize}
 \end{itemize}
 
+{\tt system\_info}
 \begin{verbatim}
 { name: "farm runner 1",
-  cpu: { architecture: "amd64",
-         count: 4,
-         ... },
+  ocaml_config: {
+    key: value,
+  }
+  cpu: { count: 4,
+         model: "intel ..." },
   memory: { size: 4096, ... },
   os: { virtualized: true,
         kind: "Linux",
         ... } }
 \end{verbatim}
+
+\begin{itemize}
+\item ocaml\_config fields are fields from ocamlopt -config
+\item On linux cpu model comes from /proc/cpuinfo ``model name'' field
+\end{itemize}
 
 \subsubsection{Format of the Result Files}
 
