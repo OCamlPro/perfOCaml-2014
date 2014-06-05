@@ -31,7 +31,6 @@ In the directory where OCaml was built:
 \item {\tt operf-micro clean}: reinitialize after a rebuild of the compiler
 \item {\tt operf-micro run}: generate the benchmark result files
 \item {\tt operf-micro build-run}: run both the build and run commands
-\item {\tt operf-micro save path}: save results to the path
 \item {\tt operf-micro compare path}: compare the results with the runs saved in the path
 \item {\tt operf-micro list}: print the list of benchmark groups
 \end{itemize}
@@ -49,12 +48,14 @@ After ensuring that the compiler seems to correctly work and install,
 run in the source directory:
 
 \begin{itemize}
-\item {\tt operf-ocaml init --(additionnal configure options)}: prepare the environment (create an opam root, switch, ...)
-\item {\tt operf-ocaml build [list of benchmark suites] }: build the compiler, the libraries and programs needed to run the selected benchmarks
+\item {\tt operf-ocaml init}: prepare the environment (create an opam root, switch, ...)
+\item {\tt operf-ocaml configure  --(additionnal configure options)}: configure ocaml build
+\item {\tt operf-ocaml build [list of benchmark suites] }: build the
+  libraries and programs needed to run the selected benchmarks
 \item {\tt operf-ocaml run}: run the selected benchmarks and generate the result files
-\item {\tt operf-ocaml save path}: save results to the path
 \item {\tt operf-ocaml compare path}: compare the results with the runs saved in the path
 \item {\tt operf-ocaml clean}: reset to the state after init (can change the compiler source code and launch build with the updated sources).
+\item {\tt operf-ocaml list}: list available benchmarks
 \end{itemize}
 
 \subsection{Macro-benchmarking an OPAM Switch}
@@ -112,7 +113,7 @@ In the directory {\tt\em \$OCAMLSRC} where OCaml was built:
 \item {\tt operf-micro build [--byte | --opt] [--args ``...'' | --opt-args ``...'' | --byte-args ``...''] [--name ``...'']}\\
   Create or replace the files
   \begin{itemize}
-  \item {\tt operf/timestamp} containing the current time, in the
+  \item {\tt operf/micro/timestamp} containing the current time, in the
     {\tt\em YYYY-MM-DD\_hh-mm-ss} format identifying the build.
   \item {\tt operf/name} containing the {\tt --name} argument, to
     annotate the build
@@ -132,16 +133,17 @@ In the directory {\tt\em \$OCAMLSRC} where OCaml was built:
   can lead to false comparisons).
 \item {\tt operf-micro clean}\\
   Reinitialize after a rebuild of the compiler
-\item {\tt operf-micro run [--fast | --slow | --all] [--name ``...''] [--arg n]}\\
+\item {\tt operf-micro run [--fast | --slow | --all] [--name ``...'']
+  [--arg n] [-o ``path'']}\\
   Run the micro-benchmarks. If {\tt \$OCAMLSRC/byterun/ocamlrun},
   {\tt \$OCAMLSRC/ocamlc} or {\tt \$OCAMLSRC/ocamlopt} have changed since the
   last compilation, it will first clean the benchmarks. If needed, it will
   compile the benchmarks.
 
-  Results are stored in {\tt \$HOME/.operf/results/{\em name}/{\em
-      date}/}\footnote{TODO: XDG} where {\tt\em date} has the
-  format {\tt\em YYYY-MM-DD\_hh-mm-ss} (the date is the one recorded
-  in {\tt operf/timestamp}.
+  If {\tt -o path} is specified, record results in this directory,
+  othewise record it in {\tt
+    \$HOME/.operf/results/{\em name}/{\em date}/}\footnote{TODO: XDG}
+  (the date is the one recorded in {\tt operf/micro/timestamp}.
 
   If {\tt --all} is specified, all benchmarks are run, if {\tt --slow}
   is specified, slower benchmarks are not run, if none or
@@ -261,7 +263,7 @@ ocamlrun ocamlopt -I stdlib -I bigarray bigarray.cma -rectypes $ARGS $BYTE_ARGS 
 \end{verbatim}
 
 
-{\tt micro\_bench\_type.mli} is fixed and is:
+\label{micro_bench_type.mli}{\tt micro\_bench\_type.mli} is fixed and is:
 \begin{verbatim}
 type result =
   | Ok
@@ -320,45 +322,63 @@ type benchmark = string (* function name *)
 
 {\tt system\_info}
 \begin{verbatim}
-{ name: "farm runner 1",
+{ host_name: "farm runner 1",
   ocaml_config: {
     key: value,
   }
+  ocaml_version: {
+    base: "4.02+...",
+    commit: "git:1234AEF",
+    clean_repository: false
+  }
   cpu: { count: 4,
          model: "intel ..." },
-  memory: { size: 4096, ... },
+  memory: { size: 4096 },
   os: { virtualized: true,
         kind: "Linux",
-        ... } }
+        version: "3.13..." } }
 \end{verbatim}
 
 \begin{itemize}
 \item ocaml\_config fields are fields from ocamlopt -config
+\item ocaml\_version commit and clean\_repository fields are
+  optionnal.  they are provided if the running directory is in the
+  ocaml source tree and it is a git or svn repository. It is the last
+  commit identifier. If the repository is not completely commited
+  (told by git status), clean\_repository is false
 \item On linux cpu model comes from /proc/cpuinfo ``model name'' field
+\item memory size is in MB
+\item os kind is the result of {\tt uname} on Unices or ``Windows''
 \end{itemize}
 
-\subsubsection{Format of the Result Files}
+\subsubsection{Format of the Result Files}\label{result-format}
 
 \begin{verbatim}
 { name: "benchmark name",
-  ocaml-version: "4.02.1+hash",
-  date: "Mon Jun  2 15:27:43 CEST 2014",
-  computer-description:
-    { architecure: "amd64",
-      model: "...",
-      system: "Linux 3.13-1-amd64",
-      ... },
+  date: "YYYY-MM-DD_hh-mm-ss",
   runs:
     [ { name: "some function",
         description: "...",
         list:
           [ { count: 1000, time: 0.00123, cycles: 1234567,
-              minor-words: 123, major-words: 1,
+              minor_words: 123, major_words: 1,
               compactions: 0, ... },
-            { time: 132, ... },
+            { count: 10000, time: 0.0123, ... },
             ... ] },
       ... ] }
 \end{verbatim}
+
+The list field contains informations about each launch. the records
+contains a mandatory {\tt count} field indicating the number of times
+the test was run. The time fields is the number of seconds running all
+the tests took. Each other fields are a optionnal. Potential ones are:
+\begin{itemize}
+\item {\tt cycles}: Number of cpu cycles. Recovered using perf like
+  tools for macro benchmark and rtdsc instruction on x86 for micro
+  benchmarks.
+\item {\tt minor\_words}, {\tt major\_words}, ...: Statistics provided
+  by {\tt Gc.print\_stat}
+\end{itemize}
 
 \subsubsection{Format of the Comparison Results}
 
@@ -367,10 +387,95 @@ A human readable result. Either textual statistical informations or a graph.
 \subsection{Macro-benchmarking in the Compiler Directory}
 
 \subsubsection{The {\tt operf-ocaml} tool}
+
+\begin{itemize}
+\item {\tt operf-ocaml init {\em name} [--repository url] [configure options]}\\
+  Prepares the environment for macro benchmarking the
+  compiler in the same directory:
+  \begin{itemize}
+  \item Creates an {\tt operf/macro} sub-directory.
+  \item Creates and initialise a local opam repository in the {\tt
+    operf/opam-repository} sub-directory:
+    \begin{itemize}
+    \item Create the compiler descriptions {\tt ``version''-local.descr}
+      {\tt ``version''-local.comp} in {\tt
+        operf/opam-repository/compilers/}.  the version is provided by
+      the VERSION file in the ocaml source tree. The .comp file
+      contains no build command.
+    \end{itemize}
+  \item Run {\tt opam init --root operf/opamroot/ --comp
+    ``version''-local local operf/opam-repository/}
+  \item Run {\tt opam repository add default ``url''}\\ if
+    [--repository ``url''] is specified use it as url otherwise use
+    {\tt https://opam.ocaml.org}
+  \item Run {\tt opam switch install local --alias ``version''-local}
+  \end{itemize}
+\item {\tt operf-ocaml configure [configure options]}\\ Run {\tt
+  ./configure --prefix operf/opamroot/local/ [configure
+    options]}. Should fail if {\tt --prefix} is specified in the
+  arguments
+\item {\tt operf-ocaml build [all | list of benchmark suites]}\\
+  Creates the {\tt operf/macro/timestamp} file containing the
+  current time.
+  Run {\tt opam install --switch local [list of benchmark
+      suites]}\\ If {\tt all} is used, every package tagged with
+  ``benchmark'' is installed.
+\item {\tt operf-ocaml list}\\ Print the list of installable opam
+  packages containing the ``benchmark'' tag.
+\item {\tt operf-ocaml clean}\\ Reset to the state after init:\\
+  \begin{itemize}
+  \item {\tt opam switch remove local}
+  \item {\tt opam switch install local --alias ``version''-local}
+  \end{itemize}
+\item {\tt operf-ocaml run [--fast | --slow | --all] [--name ``benchmark name''] [-o ``path'']}\\
+  Run benchmarks found in {\tt operf/opamroot/local/share/operf/macro/}.\\
+  If [--name] is not present, run every benchmarks.
+  otherwise run only those specified.
+
+  If {\tt -o path} is specified, record results in this directory,
+  othewise record it in {\tt
+    \$HOME/.operf/results/{\em name}/{\em date}/}\footnote{TODO: XDG}
+  (the date is the one recorded in {\tt operf/macro/timestamp}.
+
+\end{itemize}
+
 ~\vspace{4cm}~
 
 \subsubsection{Format of the Macro Benchmarks}
-~\vspace{4cm}~
+
+A macro benchmark is a program and a description file. The description
+file named, {\tt ``name''.bench} has the format
+\begin{verbatim}
+{ description: "...",
+  program: "path",
+  arg: { fast: "0-10", slow: ["12", "25"], slower: "any" } }
+\end{verbatim}
+
+{\tt .bench} files are found in {\tt \$PREFIX/share/operf/macro/}
+
+\begin{itemize}
+\item {\tt program} is the path \footnote{absolute or relative to this
+  file ? which one is more practical ?} to the benchmark program.
+\item {\tt arg} is optionnal. It contains range of arguments for which
+  the benchmark is fast, slow or very slow. The format is:
+  \begin{itemize}
+  \item \begin{verbatim}"n"\end{verbatim} a single integer
+  \item \begin{verbatim}"n-m"\end{verbatim} an integer range
+  \item \begin{verbatim}["n1","n2",...]\end{verbatim} a list of integers
+  \item \begin{verbatim}"any"\end{verbatim} the set $\{0, \ldots, max\_int\}$
+  \end{itemize}
+  It has the same meaning as those specified in {\tt micro\_bench\_type.mli}\ref{micro_bench_type.mli}
+\end{itemize}
+
+The program command line is:
+{\tt program [-o path] [-arg n]}
+\begin{itemize}
+\item {\tt -o path} specify where the results are saved. The path is a
+  filename. The result is in the format specified in section
+  \ref{result-format}.
+\item {\tt -arg n} is optionnal. It can be specified only if the
+  .bench file contains an arg field.
+\end{itemize}
 
 \subsubsection{Format of the {\tt \$HOME/.operf/macro/} directory}
 ~\vspace{4cm}~
@@ -393,10 +498,17 @@ the command line).
 \begin{itemize}
 \item {\tt operf-opam [--switch {\em OPAM-SWITCH} ] install {\em
     benchmark} [...]}\\ Install the specified {\tt\em benchmarks} in
-  the current switch (or {\tt\em OPAM-SWITCH} if provided).
-\item {\tt operf-opam [--switch {\em OPAM-SWITCH} ] run [{\em benchmark} ...]}\\
+  the current switch (or {\tt\em OPAM-SWITCH} if
+  provided).\footnote{It is exactly equivalent to opam install. Is it really usefull ?}
+\item {\tt operf-opam [--switch {\em OPAM-SWITCH} ] run [{\em benchmark} ...] [-o ``path'']}\\
   Run the installed {\tt\em benchmarks} (or all the installed one, if none
   is specified) and save the corresponding results.
+\item {\tt operf-opam build-run --repository {\em REPOSITORY} {\em
+    VERSION} [{\em benchmark} ...] [-o {\em PATH}]}\\ A single command
+  to build, run, save and clean.  It creates a local opam root like
+  operf-ocaml build the compiler {\em VERSION} inside, run all
+  specified benchmarks, save the result to {\em PATH} or to operf
+  result directory and finally remove the local opam root.
 \end{itemize}
 
 \subsection{Weather service}
@@ -444,7 +556,7 @@ Potential problems:
   be done only by the library develloper).
 \end{itemize}
 
-\subsubsection{Usefull opam extension}
+\subsubsection{Usefull opam extension: multipackage}\label{opam-multipackage}
 
 Another way to specify a benchmark could be to change opam packages to
 allow multiple packages to share the same description. This could be
@@ -618,9 +730,17 @@ Common architectures results should always be provided by the same
 computers to allow easier comparisons, all results should be
 automaticaly produced and commited to the repository.
 
+\section{Needed opam extensions}
+
+\subsection{multipackage}
+see section \ref{opam-multipackage}
+
+\subsection{}
+
 \section{Related work}
 
 \href{http://speed.pypy.org/}{pypy speed site}\\
-\href{https://github.com/janestreet/core_bench}{Core\_bench}
+\href{https://github.com/janestreet/core_bench}{Core\_bench}\\
+SPEC\\
 
 \end{document}
