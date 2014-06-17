@@ -22,16 +22,16 @@ Here are some examples of how users should be able to use PerfOCaml.
 \subsection{Micro-benchmarking in the Compiler Directory}
 
 Allows to quickly evaluate the difference between previous versions or
-build of the compiler and the just build (not installed) one.
+builds of the compiler and the just built (not installed) one.
 
 In the directory where OCaml was built:
 \begin{itemize}
-\item {\tt operf-micro init name}: prepare the environment
+\item {\tt operf-micro init {\em name}}: prepare the environment
 \item {\tt operf-micro build}: prepare the benchmarking binaries
 \item {\tt operf-micro clean}: reinitialize after a rebuild of the compiler
 \item {\tt operf-micro run}: generate the benchmark result files
 \item {\tt operf-micro build-run}: run both the build and run commands
-\item {\tt operf-micro compare path}: compare the results with the runs saved in the path
+\item {\tt operf-micro compare {\em path}}: compare the results with the runs saved in the path
 \item {\tt operf-micro list}: print the list of benchmark groups
 \end{itemize}
 
@@ -48,12 +48,12 @@ After ensuring that the compiler seems to correctly work and install,
 run in the source directory:
 
 \begin{itemize}
-\item {\tt operf-ocaml init}: prepare the environment (create an opam root, switch, ...)
+\item {\tt operf-ocaml init {\em name}}: prepare the environment (create an opam root, switch, ...)
 \item {\tt operf-ocaml configure  --(additionnal configure options)}: configure ocaml build
-\item {\tt operf-ocaml build [list of benchmark suites] }: build the
+\item {\tt operf-ocaml build [list of benchmark suites] }: build ocaml, the
   libraries and programs needed to run the selected benchmarks
 \item {\tt operf-ocaml run}: run the selected benchmarks and generate the result files
-\item {\tt operf-ocaml compare path}: compare the results with the runs saved in the path
+\item {\tt operf-ocaml compare {\em path}}: compare the results with the runs saved in the path
 \item {\tt operf-ocaml clean}: reset to the state after init (can change the compiler source code and launch build with the updated sources).
 \item {\tt operf-ocaml list}: list available benchmarks
 \end{itemize}
@@ -104,9 +104,10 @@ In the directory {\tt\em \$OCAMLSRC} where OCaml was built:
     \begin{itemize}
     \item Download a compressed archive of the micro-benchmark from a
       default URL. A {\tt [--benchmarks {\em url} ]} switch could be
-      used to override the default URL, in particular to specify a
-      local archive.\footnote{It should probably use the one provided
-        at installation}
+      used to override the default URL
+      (\url{https://github.com/OCamlPro/operf-micro/archive/1.00.0.zip}),
+      in particular to specify a local archive.\footnote{It should
+        probably use the one provided at installation}
     \item Extract the archive in the {\tt operf} sub-directory
     \end{itemize}
   \end{itemize}
