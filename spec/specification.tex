@@ -41,7 +41,7 @@ completely unrelated versions of the compiler.
 
 \subsection{Macro-benchmarking in the Compiler Directory}
 
-Provides a more complete idea of the performance of a functionnal
+Provides a more complete idea of the performance of a functional
 ocaml source tree.
 
 After ensuring that the compiler seems to correctly work and install,
@@ -49,7 +49,7 @@ run in the source directory:
 
 \begin{itemize}
 \item {\tt operf-ocaml init {\em name}}: prepare the environment (create an opam root, switch, ...)
-\item {\tt operf-ocaml configure  --(additionnal configure options)}: configure ocaml build
+\item {\tt operf-ocaml configure  --(additional configure options)}: configure ocaml build
 \item {\tt operf-ocaml build [list of benchmark suites] }: build ocaml, the
   libraries and programs needed to run the selected benchmarks
 \item {\tt operf-ocaml run}: run the selected benchmarks and generate the result files
@@ -210,9 +210,9 @@ In each case, the directory structure is:
   \item {\tt benchmark.ml}: containing a {\tt functions} variable of
     type ``Micro\_bench\_types.benchmark list''. It is the list of
     available functions to run.
-  \item optionnal additionnal .ml files
+  \item optionnal additional .ml files
   \item optionnal {\tt benchmark.build} file: describe how to compile the
-    suite If none provided, a reasonnable default is assumed
+    suite If none provided, a reasonable default is assumed
   \end{itemize}
 \end{itemize}
 
@@ -500,7 +500,7 @@ the command line).
 \item {\tt operf-opam [--switch {\em OPAM-SWITCH} ] install {\em
     benchmark} [...]}\\ Install the specified {\tt\em benchmarks} in
   the current switch (or {\tt\em OPAM-SWITCH} if
-  provided).\footnote{It is exactly equivalent to opam install. Is it really usefull ?}
+  provided).\footnote{It is exactly equivalent to opam install. Is it really useful ?}
 \item {\tt operf-opam [--switch {\em OPAM-SWITCH} ] run [{\em benchmark} ...] [-o ``path'']}\\
   Run the installed {\tt\em benchmarks} (or all the installed one, if none
   is specified) and save the corresponding results.
@@ -517,7 +517,7 @@ the command line).
 
 \section{Miscellaneous Ideas}
 
-Provides a more complete idea of the performance of a functionnal
+Provides a more complete idea of the performance of a functional
 ocaml source tree.
 
 Basic aim:
@@ -544,7 +544,7 @@ A package generating benchmark results should be annotated with the
 
 \begin{itemize}
 \item No or minimal change to opam are required.
-\item Allow to add additionnal dependencies to the benchmark that are
+\item Allow to add additional dependencies to the benchmark that are
   not required by the original package.
 \end{itemize}
 
@@ -554,10 +554,10 @@ Potential problems:
   not directly possible. It can be circumvented by having a benchmark
   package containing the library sources (more package management
   work), or by exposing a benchmarkable value in the interfaces (can
-  be done only by the library develloper).
+  be done only by the library developer).
 \end{itemize}
 
-\subsubsection{Usefull opam extension: multipackage}\label{opam-multipackage}
+\subsubsection{Useful opam extension: multipackage}\label{opam-multipackage}
 
 Another way to specify a benchmark could be to change opam packages to
 allow multiple packages to share the same description. This could be
@@ -610,7 +610,7 @@ This single opam file would describe, the package ``mylib'' but also
 
 To distinguish with a specified ``mylib-benchmark'' package and allow
 to chose which one to install (with opam pin), the version of this
-kind of package whould be suffixed with ``+target'', and discret
+kind of package whould be suffixed with ``+target'', and discrete
 packages with this suffix would be forbidden. To ensure that the
 ``-target'' packages are not installed with a different version of the
 library or program, implicit conflicts are added (the same conflicts
@@ -627,7 +627,7 @@ Advantages
 \item Could serve to also handle tests: The problem with testing is
   that it is often easier to run them in the directory where the
   library or program was built, because some tested functions could be
-  hidden by interfaces or some usefull data are kept in the source
+  hidden by interfaces or some useful data are kept in the source
   tree. With this proposition, it is simple to define such testing
   packages without duplicating package descriptions.
 
@@ -645,7 +645,7 @@ benchmarking package like in the previous proposition.
 Potential problems:
 \begin{itemize}
 \item Increased compilation time when systematically building the
-  documentation. There may be some reasonnable solutions to build the
+  documentation. There may be some reasonable solutions to build the
   documentation where the library has been built in some common cases.
 \item more changes to opam
 \end{itemize}
@@ -662,7 +662,7 @@ Input:
 Output:
 \begin{itemize}
 \item A benchmark file.
-\item Additionnal informations to analyse the results provided by
+\item Additional informations to analyse the results provided by
   tools like \texttt{perf record} on linux or \texttt{callgrind}
 \end{itemize}
 
@@ -677,7 +677,7 @@ convention that the environment variable
 be written (using Gc.print\_stat).
 
 Defining a macrobenchmark package of a program built by an existing
-opam package should not requires to provides additionnal sources (a
+opam package should not requires to provides additional sources (a
 url file in the opam package).
 
 \subsection{Microbenchmark runner}
