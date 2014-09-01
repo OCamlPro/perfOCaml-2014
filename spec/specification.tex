@@ -72,12 +72,12 @@ Every day or commit in a compiler branch the compiler should be
 rebuilt and run on various sets of benchmarks based on a set of fixed
 versions of opam packages (the same for every version of the compiler)
 
-The site should provide graphs of evolutions of differents agregated
-performance indices, precise results for each benchmarks, a list of
-significative regressions and analysable raw data (like perf records).
+The site should provide graphs of evolution of different aggregated
+performance indexes, precise results for each benchmarks, a list of
+significant regressions and analyzable raw data (like perf records).
 
 Users using exotic architectures or systems should be able to submit
-result assotiated with precise informations about the run environment.
+result associated with precise information about the run environment.
 
 \section{Sub-Projects}
 
@@ -95,7 +95,7 @@ In the directory {\tt\em \$OCAMLSRC} where OCaml was built:
   indicating that the name of the current compiler is {\tt\em name}.
   {\tt operf-micro} will complain if the directory
   {\tt \$HOME/.operf/micro/{\em name}/} \footnote{TODO the path should
-    follow XDG recomandations} already exists (as it will try to
+    follow XDG recommendations} already exists (as it will try to
   save the micro-benchmarks results in that location).
   \item
     if {\tt \$PREFIX/share/operf/micro} exists, copy it to the
@@ -120,7 +120,7 @@ In the directory {\tt\em \$OCAMLSRC} where OCaml was built:
     annotate the build
   \item {\tt operf/args} {\tt operf/byte-args} {\tt operf/opt-args}
     containing the {\tt --args} argument, to pass compilation options
-    to ocaml when building benchmarks. Typically for optimisations
+    to ocaml when building benchmarks. Typically for optimization
     (like --inline or --unsafe)
   \end{itemize}
   Try to build the benchmarks, using the local compiler. The benchmarks will
@@ -142,7 +142,7 @@ In the directory {\tt\em \$OCAMLSRC} where OCaml was built:
   compile the benchmarks.
 
   If {\tt -o path} is specified, record results in this directory,
-  othewise record it in {\tt
+  otherwise record it in {\tt
     \$HOME/.operf/results/{\em name}/{\em date}/}\footnote{TODO: XDG}
   (the date is the one recorded in {\tt operf/micro/timestamp}.
 
@@ -156,7 +156,7 @@ In the directory {\tt\em \$OCAMLSRC} where OCaml was built:
   times to run multiple functions. If no --name option is present, all
   functions are run. \\
   If {\tt --arg n} is specified with n an integer or a range ``n-m'' of
-  integers, parametrised benchmarks are run with those arguments. Can
+  integers, parametric benchmarks are run with those arguments. Can
   be specified multiple times
 
 \item {\tt operf-micro build-run [build and run options]}\\
@@ -202,7 +202,7 @@ Micro benchmarks can be provided:\label{micro-dir-format}
 In each case, the directory structure is:
 
 \begin{itemize}
-\item {\tt description.txt}: a textual desciprion of what the benchmark does and evaluates
+\item {\tt description.txt}: a textual description of what the benchmark does and evaluates
 \item Directories whose names are benchmarks names. A directory is
   considered to describe a benchmark if it contains a {\tt
     benchmark.ml} file.
@@ -210,8 +210,8 @@ In each case, the directory structure is:
   \item {\tt benchmark.ml}: containing a {\tt functions} variable of
     type ``Micro\_bench\_types.benchmark list''. It is the list of
     available functions to run.
-  \item optionnal additional .ml files
-  \item optionnal {\tt benchmark.build} file: describe how to compile the
+  \item optional additional .ml files
+  \item optional {\tt benchmark.build} file: describe how to compile the
     suite If none provided, a reasonable default is assumed
   \end{itemize}
 \end{itemize}
@@ -244,7 +244,7 @@ let functions =
   opt: ["-rectypes"]
   available_if: ... }
 \end{verbatim}
-\footnote{available\_if still to define. Does it contraint ocaml version, or features ?}
+\footnote{available\_if still to define. Does it constraint ocaml version, or features ?}
 
 If available\_if if not verified or if libraries specified in link are
 not available, the benchmark won't be built or run.
@@ -343,9 +343,9 @@ type benchmark = string (* function name *)
 \begin{itemize}
 \item ocaml\_config fields are fields from ocamlopt -config
 \item ocaml\_version commit and clean\_repository fields are
-  optionnal.  they are provided if the running directory is in the
+  optional.  they are provided if the running directory is in the
   ocaml source tree and it is a git or svn repository. It is the last
-  commit identifier. If the repository is not completely commited
+  commit identifier. If the repository is not completely committed
   (told by git status), clean\_repository is false
 \item On linux cpu model comes from /proc/cpuinfo ``model name'' field
 \item memory size is in MB
@@ -369,10 +369,10 @@ type benchmark = string (* function name *)
       ... ] }
 \end{verbatim}
 
-The list field contains informations about each launch. the records
+The list field contains information about each launch. the records
 contains a mandatory {\tt count} field indicating the number of times
 the test was run. The time fields is the number of seconds running all
-the tests took. Each other fields are a optionnal. Potential ones are:
+the tests took. Each other fields are a optional. Potential ones are:
 \begin{itemize}
 \item {\tt cycles}: Number of cpu cycles. Recovered using perf like
   tools for macro benchmark and rtdsc instruction on x86 for micro
@@ -383,7 +383,7 @@ the tests took. Each other fields are a optionnal. Potential ones are:
 
 \subsubsection{Format of the Comparison Results}
 
-A human readable result. Either textual statistical informations or a graph.
+A human readable result. Either textual statistical information or a graph.
 ~\vspace{4cm}~
 \subsection{Macro-benchmarking in the Compiler Directory}
 
@@ -395,7 +395,7 @@ A human readable result. Either textual statistical informations or a graph.
   compiler in the same directory:
   \begin{itemize}
   \item Creates an {\tt operf/macro} sub-directory.
-  \item Creates and initialise a local opam repository in the {\tt
+  \item Creates and initialize a local opam repository in the {\tt
     operf/opam-repository} sub-directory:
     \begin{itemize}
     \item Create the compiler descriptions {\tt ``version''-local.descr}
@@ -421,7 +421,7 @@ A human readable result. Either textual statistical informations or a graph.
   Run {\tt opam install --switch local [list of benchmark
       suites]}\\ If {\tt all} is used, every package tagged with
   ``benchmark'' is installed.
-\item {\tt operf-ocaml list}\\ Print the list of installable opam
+\item {\tt operf-ocaml list}\\ Print the list of available opam
   packages containing the ``benchmark'' tag.
 \item {\tt operf-ocaml clean}\\ Reset to the state after init:\\
   \begin{itemize}
@@ -434,7 +434,7 @@ A human readable result. Either textual statistical informations or a graph.
   otherwise run only those specified.
 
   If {\tt -o path} is specified, record results in this directory,
-  othewise record it in {\tt
+  otherwise record it in {\tt
     \$HOME/.operf/results/{\em name}/{\em date}/}\footnote{TODO: XDG}
   (the date is the one recorded in {\tt operf/macro/timestamp}.
 
@@ -457,7 +457,7 @@ file named, {\tt ``name''.bench} has the format
 \begin{itemize}
 \item {\tt program} is the path \footnote{absolute or relative to this
   file ? which one is more practical ?} to the benchmark program.
-\item {\tt arg} is optionnal. It contains range of arguments for which
+\item {\tt arg} is optional. It contains range of arguments for which
   the benchmark is fast, slow or very slow. The format is:
   \begin{itemize}
   \item \begin{verbatim}"n"\end{verbatim} a single integer
@@ -474,7 +474,7 @@ The program command line is:
 \item {\tt -o path} specify where the results are saved. The path is a
   filename. The result is in the format specified in section
   \ref{result-format}.
-\item {\tt -arg n} is optionnal. It can be specified only if the
+\item {\tt -arg n} is optional. It can be specified only if the
   .bench file contains an arg field.
 \end{itemize}
 
@@ -610,7 +610,7 @@ This single opam file would describe, the package ``mylib'' but also
 
 To distinguish with a specified ``mylib-benchmark'' package and allow
 to chose which one to install (with opam pin), the version of this
-kind of package whould be suffixed with ``+target'', and discrete
+kind of package would be suffixed with ``+target'', and discrete
 packages with this suffix would be forbidden. To ensure that the
 ``-target'' packages are not installed with a different version of the
 library or program, implicit conflicts are added (the same conflicts
@@ -662,7 +662,7 @@ Input:
 Output:
 \begin{itemize}
 \item A benchmark file.
-\item Additional informations to analyse the results provided by
+\item Additional information to analyze the results provided by
   tools like \texttt{perf record} on linux or \texttt{callgrind}
 \end{itemize}
 
@@ -671,7 +671,7 @@ way.
 
 Reporting more precise result like cycles is easy on linux but
 other systems would require some search. GC statistics requires
-changes to the original program. A possibility would be to addopt as
+changes to the original program. A possibility would be to adopt as
 convention that the environment variable
 \texttt{OCAML\_GC\_STATISTICS} contains a file where statistics should
 be written (using Gc.print\_stat).
@@ -683,11 +683,11 @@ url file in the opam package).
 \subsection{Microbenchmark runner}
 
 Runs a set of functions, test the results, records the
-timings/cycles/gc informations and write raw results to the directory
+timings/cycles/gc information and write raw results to the directory
 fixed by convention.
 
 Probably the runner part of core\_bench. This should be extracted from
-core\_bench (3 files) to minimize dependencies, especialy camlp4.
+core\_bench (3 files) to minimize dependencies, especially camlp4.
 
 This should be provided as a template package, already containing
 build system and base files. The user should only provide a .ml file
@@ -702,18 +702,18 @@ containing those 2 files in the \texttt{files} subdirectory.
 
 A set of microbenchmarks able to run everywhere without any difference
 should be provided to reliably test the compiler. It should not depend
-on any kind of code generation, or feaure specific to a version.
+on any kind of code generation, or feature specific to a version.
 
 \subsection{Management}
 
 \begin{itemize}
 \item List packages containing benchmarks
-\item Prepare an opam switch to install a manualy built compiler
+\item Prepare an opam switch to install a manually built compiler
 \item One command compile/run/recover/clean for a given opam compiler
   package and set of benchmarks.
 \end{itemize}
 
-\subsection{Agregation}
+\subsection{Aggregation}
 
 This tool should produce the set of graphs given a set of raw
 results. It will probably use core\_bench for the statistics part. It
@@ -723,13 +723,13 @@ should produce the final html pages to display on the public site.
 
 Use github: no tool needed.
 
-Benchmark results should be managed in a centralised git repositories,
+Benchmark results should be managed in a centralized git repositories,
 probably using github to minimize maintenance. Users publishing
 results on their exotic systems should send patches/pull requests.
 
 Common architectures results should always be provided by the same
 computers to allow easier comparisons, all results should be
-automaticaly produced and commited to the repository.
+automatically produced and committed to the repository.
 
 \section{Needed opam extensions}
 
