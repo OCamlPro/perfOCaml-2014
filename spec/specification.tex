@@ -534,10 +534,14 @@ function) and \emph{macro-benchmarks} (a program).
 \subsection{Description of a global benchmarks}
 
 A benchmark is a specific OPAM package, it is not included in the
-library or program package. Running is done by installing the
-benchmark package. The install instruction copy the resulting data to
-a directory fixed by convention. (probably
+library or program package. The install instruction copy the resulting
+data to a directory fixed by convention. (probably
 \texttt{\%\{prefix\}\%/bench/package\_name})
+
+The actual benchmarking is performed by the \texttt{operf-macro} tool
+using the artifacts installed by the OPAM package of the benchmark,
+comprising a \texttt{.bench} file, and maybe other binaries and/or
+data files.
 
 A package generating benchmark results should be annotated with the
 \texttt{benchmark} tag.
